@@ -24,6 +24,7 @@ The extension does not request access to every website for content scanning. Its
 - Text classification executes locally after the model has been downloaded. Post text and the local database are not uploaded to XRepHunter infrastructure.
 - When image analysis is enabled, the browser fetches the referenced X media URL so the local image model can analyze it. The media request goes to the image host.
 - Model downloads go to the model host named in the source. Model files are cached by the browser. Model repositories and revisions are not all pinned to immutable commit hashes, so upstream changes can affect repeatability.
+- The source has no Ollama endpoint or Ollama server integration. Model inference described here runs in the extension through Transformers.js/ONNX Runtime Web or Wllama WebAssembly.
 - XRepHunter reads content available to the user’s signed-in browser session. The extension does not bypass access controls or use an X API key.
 
 X itself continues to make its normal website requests in the browser. XRepHunter’s page hook observes selected response data available to the page and passes parsed fields to the extension for local analysis.

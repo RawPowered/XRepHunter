@@ -4,7 +4,7 @@ The repository includes two captures of the XRepHunter extension running in a br
 
 ## Live feed review
 
-[`live-feed-review.png`](../assets/screenshots/live-feed-review.png) shows the extension's reputation and post-signal badges rendered beside posts in a signed-in X feed. The “Why this score?” control is present on each scored post. The screenshot records an interface state; it does not validate score accuracy.
+[`live-feed-review.png`](../assets/screenshots/live-feed-review.png) shows the extension's reputation and post-signal badges rendered beside posts in a signed-in X feed. The “Why this score?” control is present on each scored post. The screenshot records an interface state; it does not reveal whether an optional model was loaded and does not validate score accuracy.
 
 ## Local rules dashboard
 

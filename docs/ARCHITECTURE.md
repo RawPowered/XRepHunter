@@ -33,7 +33,7 @@ XRepHunter is a Chrome and Edge Manifest V3 extension. It reads pages the user o
 
 ## Model execution
 
-The extension uses Transformers.js with ONNX Runtime Web for text, image, and toxicity pipelines. A separate Wllama runtime supports the optional Distil Labs text model. The background service worker sends work to the offscreen document; model inference runs in that extension context.
+The extension computes the base account reputation score with TypeScript heuristics, observed signals, and configured examples. It uses Transformers.js with ONNX Runtime Web for optional text, image, and toxicity classifiers. A separate Wllama WebAssembly runtime supports an optional GGUF text classifier. The background service worker sends model work to the offscreen document; inference runs in that extension context. This source has no Ollama API client or local Ollama server dependency.
 
 Model weights are fetched from their configured Hugging Face repositories when needed. ONNX runtime files and Wllama browser assets are prepared from locked npm packages during installation or build. The model weights are not committed to this repository.
 
