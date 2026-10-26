@@ -37,6 +37,20 @@ The scoring pipeline includes account and handle patterns, posting and engagemen
 
 The extension uses a Manifest V3 content script and page hook, a background service worker, and an offscreen document for SQLite and model work. The dashboard reads the same extension-local data store.
 
+## Evidence from the running extension
+
+These captures show XRepHunter's feed badges and local rules dashboard in a browser session. Account names and handles are covered, and profile images are pixelated. Scores are review signals from this session, not validated accuracy claims.
+
+![Redacted live feed with XRepHunter reputation and post-signal badges](assets/screenshots/live-feed-review.png)
+
+*Live-feed review: score badges and the “Why this score?” evidence entry point appear alongside posts.*
+
+![XRepHunter local dashboard showing reputation rules and user controls](assets/screenshots/local-dashboard.png)
+
+*Local dashboard: adjustable signal weights, thresholds, learning mode, and opt-in block suggestions.*
+
+For capture context and redactions, see [Screenshot evidence](docs/SCREENSHOT-EVIDENCE.md).
+
 ## Run it locally
 
 Requirements: Node.js with npm, plus Chrome or Edge for loading the unpacked extension.

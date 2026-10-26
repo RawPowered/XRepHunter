@@ -8,6 +8,7 @@ public/onnx/
 public/sql/
 public/wllama/
 public/icon-*.png
+assets/screenshots/*-raw.*
 *.zip
 *.log
 *.db
