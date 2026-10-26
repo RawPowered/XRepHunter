@@ -1,0 +1,25 @@
+{
+  "name": "xrephunter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "build": "node scripts/copy-onnx-runtime.mjs && node scripts/copy-sql-wasm.mjs && node scripts/copy-wllama-runtime.mjs && wxt build && node scripts/print-extension-path.mjs",
+    "zip": "wxt zip",
+    "postinstall": "node scripts/gen-icons.mjs && node scripts/copy-onnx-runtime.mjs && node scripts/copy-sql-wasm.mjs && node scripts/copy-wllama-runtime.mjs && wxt prepare",
+    "icons": "node scripts/gen-icons.mjs",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/sql.js": "^1.4.11",
+    "typescript": "^5.7.2",
+    "vitest": "^3.2.4",
+    "wxt": "^0.20.26"
+  },
+  "dependencies": {
+    "@wllama/wllama": "2.4.0",
+    "@huggingface/transformers": "^3.4.0",
+    "sql.js": "^1.14.1"
+  }
+}
