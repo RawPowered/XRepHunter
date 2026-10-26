@@ -429,7 +429,8 @@ export async function attachTweetStatsBar(
   const slopModelsOn =
     settings.slopOnnxEnabled !== false ||
     settings.aiSlopModelEnabled ||
-    settings.slopImageModelEnabled !== false;
+    settings.slopImageModelEnabled !== false ||
+    (settings.ollamaModelEnabled && Boolean(settings.ollamaModel));
 
   if (
     !lightRefresh &&

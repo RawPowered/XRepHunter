@@ -9,6 +9,7 @@ import { classifySlopText, getSlopModelStatus } from './model-bridge';
 import { checkSlopOnnxOffscreenStatus, classifySlopOnnxText } from './onnx-bridge';
 import { checkSlopImageOffscreenStatus, classifySlopImage } from './image-bridge';
 import { scoreMediaHeuristic } from './media-heuristic';
+import { classifyTextWithOllama } from '../ollama/api';
 import type { TweetMediaInfo } from './extract-tweet-content';
 
 let onnxReadyCache: boolean | null = null;
@@ -18,6 +19,15 @@ let imageReadyAt = 0;
 let wllamaReadyCache: boolean | null = null;
 let wllamaReadyAt = 0;
 const READY_TTL_MS = 30_000;
+const ollamaCache = new Map<string, { at: number; score: number; label: NonNullable<SlopAnalysis['ollamaLabel']>; model: string }>();
+const ollamaInflight = new Map<string, Promise<{ score: number; label: NonNullable<SlopAnalysis['ollamaLabel']>; model: string }>>();
+let ollamaActiveRequests = 0;
+
+async function ollamaCacheKey(model: string, text: string): Promise<string> {
+  const bytes = new TextEncoder().encode(`${model}\0${text}`);
+  const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+  return `${model}:${Array.from(digest, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+}
 
 async function isOnnxReady(): Promise<boolean> {
   if (onnxReadyCache != null && Date.now() - onnxReadyAt < READY_TTL_MS) return onnxReadyCache;
@@ -59,6 +69,9 @@ export async function classifySlopMedia(
   let modelLabel: SlopAnalysis['modelLabel'];
   let image: number | undefined;
   let imageLabel: string | undefined;
+  let ollama: number | undefined;
+  let ollamaLabel: SlopAnalysis['ollamaLabel'];
+  let ollamaModel: string | undefined;
 
   const mlTasks: Promise<void>[] = [];
 
@@ -91,6 +104,46 @@ export async function classifySlopMedia(
     );
   }
 
+  if (settings.ollamaModelEnabled && settings.ollamaModel && trimmed.length >= 20) {
+    mlTasks.push((async () => {
+      const key = await ollamaCacheKey(settings.ollamaModel, trimmed.slice(0, 2_000));
+      const cached = ollamaCache.get(key);
+      if (cached && Date.now() - cached.at < 20 * 60_000) {
+        ollama = cached.score;
+        ollamaLabel = cached.label;
+        ollamaModel = cached.model;
+        return;
+      }
+      let task = ollamaInflight.get(key);
+      let ownsTask = false;
+      if (!task) {
+        // Keep a burst of unique timeline posts from overwhelming a local model server.
+        if (ollamaActiveRequests >= 2) return;
+        ollamaActiveRequests += 1;
+        ownsTask = true;
+        task = classifyTextWithOllama(trimmed, settings.ollamaModel).then((result) => ({
+          score: result.score, label: result.label, model: result.model,
+        }));
+        ollamaInflight.set(key, task);
+      }
+      try {
+        const result = await task;
+        ollama = result.score;
+        ollamaLabel = result.label;
+        ollamaModel = result.model;
+        ollamaCache.set(key, { ...result, at: Date.now() });
+        while (ollamaCache.size > 256) ollamaCache.delete(ollamaCache.keys().next().value!);
+      } catch {
+        // Ollama is an optional refinement; heuristic and bundled models remain available.
+      } finally {
+        if (ownsTask) {
+          ollamaInflight.delete(key);
+          ollamaActiveRequests = Math.max(0, ollamaActiveRequests - 1);
+        }
+      }
+    })());
+  }
+
   if (settings.slopImageModelEnabled !== false && media.imageUrl) {
     mlTasks.push(
       (async () => {
@@ -113,6 +166,9 @@ export async function classifySlopMedia(
     onnxLabel,
     model,
     modelLabel,
+    ollama,
+    ollamaLabel,
+    ollamaModel,
     image,
     imageLabel,
     mediaSignals,

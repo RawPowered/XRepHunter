@@ -93,7 +93,7 @@
     <section id="tab-slop" class="tab">
       <h1>AI slop detection</h1>
       <p class="hint">
-        Heuristic scoring runs on every profile scan and post: AI cliché phrases, uniform “burstiness,” promo patterns, and rhetorical “No hype / Just X” stacks — not plain bullet lists. Optional local model (~253MB, Distil Labs, Apache 2.0) runs in-browser; text never leaves your device.
+        Heuristic scoring runs on profile scans and posts. Optional Wllama and ONNX models run in the browser. Ollama is a separate opt-in signal that sends eligible post text to a selected local Ollama server; a remote provider configured within Ollama may process that text remotely.
       </p>
       <p class="hint">
         Timeline content chip: <strong>S</strong> slop · <strong>T</strong> toxicity · <strong>Sp</strong> spam (author + tweet). Green <strong>OK</strong> when all are below thresholds.
@@ -123,6 +123,17 @@
       <p id="slop-model-status" class="hint">Model: not loaded</p>
       <div class="bar" style="max-width:320px"><div id="slop-model-progress" class="fill slop" style="width:0%"></div></div>
       <button type="button" id="slop-model-load">Load / retry Wllama model</button>
+      <h2>Ollama model scoring</h2>
+      <p class="hint">Optional local-server scoring. When enabled, eligible post text (up to 2,000 characters) is sent to Ollama at 127.0.0.1:11434. Choose a locally installed model. XRepHunter does not download or pull models. Ollama may be configured separately to use a remote provider.</p>
+      <label class="row">
+        <input type="checkbox" id="ollama-model-enabled" />
+        Enable Ollama scoring
+      </label>
+      <label class="row">Installed model
+        <select id="ollama-model-select" disabled><option value="">Connect to Ollama to list models</option></select>
+      </label>
+      <button type="button" id="ollama-model-refresh">Check local Ollama</button>
+      <p id="ollama-model-status" class="hint">Ollama: disabled</p>
       <label class="row">
         <input type="checkbox" id="slop-onnx-enabled" checked />
         Enable ONNX text slop (onnx-community/roberta-base-openai-detector-ONNX)

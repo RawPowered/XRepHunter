@@ -70,19 +70,21 @@ WXT writes the unpacked build to `extension/`. Open `chrome://extensions` or `ed
 
 The base reputation score is computed in the extension from account and post signals, configured heuristics, and saved examples. Model-based content signals add optional refinements. The build prepares ONNX Runtime, SQLite, and Wllama browser runtime files from the locked npm dependencies; model weights are fetched from their configured hosts when loaded and cached by the browser.
 
-This source uses Transformers.js with ONNX Runtime Web for ONNX text, image, and toxicity models. It uses Wllama, a WebAssembly runtime, for a separate GGUF text classifier. The current source has no Ollama client or Ollama server endpoint. Installing or removing the Ollama desktop service does not change this build's scoring path. See [Build and install](docs/BUILD-AND-INSTALL.md) for the full dependency and model setup.
+This source uses Transformers.js with ONNX Runtime Web for ONNX text, image, and toxicity models. It uses Wllama, a WebAssembly runtime, for a separate GGUF text classifier. An optional Ollama integration can add text scoring through a user-selected model on `127.0.0.1:11434`. The core heuristic score works without Ollama. See [Build and install](docs/BUILD-AND-INSTALL.md) for setup and [Privacy and security](docs/PRIVACY-AND-SECURITY.md) for its data flow.
 
 The project includes `npm test` for the Vitest suite and `npm run zip` for packaging the build. See [Build and install](docs/BUILD-AND-INSTALL.md) for the complete setup and distribution notes.
 
 ## Data and network behavior
 
 - There is no application server or telemetry endpoint in this project. Extension settings use browser local storage. Observed records and analytics snapshots use a SQLite database persisted in extension storage.
-- Text and model inference run in the browser. Model weights are downloaded from Hugging Face when a model is first loaded. ONNX Runtime Web is packaged from npm; the build script retains a jsDelivr fallback for its WebAssembly asset.
+- Bundled model inference runs in the browser. Model weights are downloaded from Hugging Face when a model is first loaded. ONNX Runtime Web is packaged from npm; the build script retains a jsDelivr fallback for its WebAssembly asset. The optional Ollama feature sends eligible post text to a user-selected local server only after explicit setup in the dashboard.
 - Image analysis fetches image URLs from X’s public media hosts when the image classifier is enabled. This is a request for the image itself; it does not upload the text corpus or local database to XRepHunter infrastructure.
 - XRepHunter reads pages available to the signed-in browser session. Its page and GraphQL parsing depends on X’s changing web interface. It does not use an X API key or bypass access controls.
 - Review [the full data-flow and permission notes](docs/PRIVACY-AND-SECURITY.md) before enabling model features or using the extension with sensitive browsing sessions.
 
 ## Evidence and limitations
+
+The repository includes [redacted live interface captures](docs/SCREENSHOT-EVIDENCE.md), plus [historical May 2026 scoring evidence](docs/SCREENSHOT-EVIDENCE.md#historical-scoring-captures-may-2026). The historical captures show earlier UI states and are not model validation or accuracy benchmarks.
 
 - Heuristics and classifiers can produce false positives and false negatives. Treat scores as contextual signals, not findings about a person.
 - Account labels, content categories, and synthetic-content indicators are uncertain. Review the underlying post, profile, timing, and visible evidence before acting.

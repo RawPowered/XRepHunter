@@ -60,6 +60,7 @@ export default defineConfig({
       'https://pbs.twimg.com/*',
       'https://*.twimg.com/*',
     ],
+    optional_host_permissions: ['http://127.0.0.1:11434/*'],
     icons: {
       16: 'icon-16.png',
       32: 'icon-32.png',

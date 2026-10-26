@@ -91,6 +91,15 @@ body {
 h1 { margin-top: 0; font-size: 22px; }
 h2 { font-size: 16px; margin: 20px 0 8px; color: #e7e9ea; }
 .row { display: flex; align-items: center; gap: 12px; margin: 12px 0; flex-wrap: wrap; }
+#ollama-model-select {
+  min-width: 220px;
+  padding: 8px 12px;
+  border: 1px solid #2f3336;
+  border-radius: 8px;
+  background: #16181c;
+  color: #e7e9ea;
+}
+#ollama-model-select:disabled { color: #71767b; }
 .detectors label { display: block; margin: 8px 0; }
 .bar {
   height: 8px;

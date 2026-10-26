@@ -10,6 +10,19 @@ The repository includes two captures of the XRepHunter extension running in a br
 
 [`local-dashboard.png`](../assets/screenshots/local-dashboard.png) shows detector controls, weighting and threshold inputs, learning mode, and the opt-in setting for block suggestions. Suggestions were disabled in the captured settings.
 
+## Historical scoring captures (May 2026)
+
+These older captures preserve interface evidence from an earlier scoring build. The profile identity is redacted in the score panels. Feed captures are reduced to the score-chip strip; account names, handles, post copy, avatars, and media are excluded from the public files.
+
+| Capture | Visible evidence | Interpretation |
+| --- | --- | --- |
+| [Score breakdown A](../assets/screenshots/archive/legacy-score-breakdown-may-23-a.png) | Score 38, 43 posts sampled, AI slop 72 with image signal 72 | One historical snapshot. The AI indicator was described in the panel as an indicator, not proof of authorship. |
+| [Score breakdown B](../assets/screenshots/archive/legacy-score-breakdown-may-23-b.png) | Score 40, 35 posts sampled, heuristic slop 1 | A separate snapshot with different sample count and signals. It is not a controlled comparison with capture A. |
+| [Feed score chip](../assets/screenshots/archive/legacy-feed-score-chip.png) | Score 47 and `Sp70` indicator | Historical badge display, captured May 26, 2026. |
+| [Feed post score chip](../assets/screenshots/archive/legacy-feed-post-score-chip.png) | Post-level `S0 T0 Sp90` indicators | Historical badge display, captured May 27, 2026. |
+
+The May captures document older UI and scoring states. They are not current model output, an accuracy benchmark, or validation against ground truth. Scores and classifier behavior can change with source revisions, settings, sample windows, model availability, and model versions.
+
 ## Privacy edits
 
 - Browser tabs, address bar, and unrelated toolbar items were cropped out.
@@ -19,4 +32,4 @@ The repository includes two captures of the XRepHunter extension running in a br
 
 ## Evidence limits
 
-These images show the extension loaded in a live browser session and demonstrate parts of its interface. They do not establish that its reputation scores, classifiers, or model labels are accurate, complete, or suitable for decisions about people. The feed content and numerical signals reflect one session only.
+These images show the extension loaded in browser sessions and demonstrate parts of its interface. They do not establish that its reputation scores, classifiers, or model labels are accurate, complete, or suitable for decisions about people. The feed content and numerical signals reflect specific historical sessions only.

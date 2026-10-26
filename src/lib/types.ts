@@ -159,6 +159,9 @@ export interface SlopAnalysis {
   heuristic: number;
   model?: number;
   modelLabel?: 'ai_generated' | 'human_written' | 'uncertain';
+  ollama?: number;
+  ollamaLabel?: 'ai_generated' | 'human_written' | 'uncertain';
+  ollamaModel?: string;
   onnx?: number;
   onnxLabel?: string;
   image?: number;
@@ -375,6 +378,12 @@ export interface ExtensionSettings {
 
   aiSlopModelAutoLoad: boolean;
 
+  /** Send eligible post text to an explicitly selected Ollama model on localhost. */
+  ollamaModelEnabled: boolean;
+
+  /** Installed Ollama model selected by the user. */
+  ollamaModel: string;
+
   slopDisplayThreshold: number;
 
   slopPerTweetEnabled: boolean;
@@ -459,6 +468,10 @@ export const DEFAULT_SETTINGS: ExtensionSettings = {
   aiSlopModelEnabled: false,
 
   aiSlopModelAutoLoad: false,
+
+  ollamaModelEnabled: false,
+
+  ollamaModel: '',
 
   slopDisplayThreshold: 55,
 
@@ -599,6 +612,8 @@ export type MessageType =
   | { type: 'INIT_SLOP_MODEL' }
 
   | { type: 'CLASSIFY_SLOP_TEXT'; text: string }
+
+  | { type: 'OLLAMA_LIST_MODELS' }
 
   | { type: 'CLASSIFY_SLOP_MEDIA'; text: string; imageUrl?: string }
 

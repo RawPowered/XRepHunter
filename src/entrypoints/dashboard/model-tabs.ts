@@ -27,6 +27,10 @@ const slopLoadBtn = document.getElementById('slop-model-load')!;
 const slopTestText = document.getElementById('slop-test-text') as HTMLTextAreaElement;
 const slopTestRun = document.getElementById('slop-test-run')!;
 const slopTestResult = document.getElementById('slop-test-result')!;
+const ollamaEnabledEl = document.getElementById('ollama-model-enabled') as HTMLInputElement;
+const ollamaModelEl = document.getElementById('ollama-model-select') as HTMLSelectElement;
+const ollamaRefreshEl = document.getElementById('ollama-model-refresh')!;
+const ollamaStatusEl = document.getElementById('ollama-model-status')!;
 
 const slopOnnxEnabledEl = document.getElementById('slop-onnx-enabled') as HTMLInputElement;
 const slopImageEnabledEl = document.getElementById('slop-image-enabled') as HTMLInputElement;
@@ -115,6 +119,12 @@ export async function loadSlopSettings(): Promise<void> {
   const s = await sendMessage<ExtensionSettings>({ type: 'GET_SETTINGS' });
   slopPerTweetEl.checked = s.slopPerTweetEnabled !== false;
   slopModelEnabledEl.checked = s.aiSlopModelEnabled;
+  ollamaEnabledEl.checked = s.ollamaModelEnabled;
+  ollamaModelEl.disabled = !s.ollamaModelEnabled;
+  if (s.ollamaModel) ollamaModelEl.dataset.selected = s.ollamaModel;
+  ollamaStatusEl.textContent = s.ollamaModelEnabled
+    ? `Ollama enabled · ${s.ollamaModel || 'select an installed model'}`
+    : 'Ollama disabled';
   slopModelAutoloadEl.checked = s.aiSlopModelAutoLoad;
   slopOnnxEnabledEl.checked = s.slopOnnxEnabled !== false;
   slopImageEnabledEl.checked = s.slopImageModelEnabled !== false;
@@ -176,6 +186,45 @@ export function initModelTabs(): void {
     await initSlopModel();
     void refreshSlopModelUi();
   });
+  ollamaEnabledEl.addEventListener('change', async () => {
+    const enabled = ollamaEnabledEl.checked;
+    ollamaModelEl.disabled = !enabled;
+    await saveSettings({ ollamaModelEnabled: enabled });
+    ollamaStatusEl.textContent = enabled ? 'Ollama enabled · connect to select a model' : 'Ollama disabled';
+  });
+  ollamaRefreshEl.addEventListener('click', async () => {
+    ollamaStatusEl.textContent = 'Checking local Ollama…';
+    ollamaRefreshEl.setAttribute('disabled', 'true');
+    try {
+      const originPattern = 'http://127.0.0.1:11434/*';
+      const hasPermission = await browser.permissions.contains({ origins: [originPattern] });
+      if (!hasPermission && !(await browser.permissions.request({ origins: [originPattern] }))) {
+        throw new Error('Local Ollama access was not granted.');
+      }
+      const models = await sendMessage({ type: 'OLLAMA_LIST_MODELS' }) as unknown as Array<{ name: string }>;
+      const previous = ollamaModelEl.dataset.selected ?? ollamaModelEl.value;
+      ollamaModelEl.replaceChildren();
+      if (!models.length) {
+        ollamaModelEl.add(new Option('No models installed', ''));
+        ollamaStatusEl.textContent = 'Ollama is running, but no local models were found. Install one with Ollama, then check again.';
+      } else {
+        ollamaModelEl.add(new Option('Select a model', ''));
+        for (const model of models) ollamaModelEl.add(new Option(model.name, model.name));
+        if (models.some((model) => model.name === previous)) ollamaModelEl.value = previous;
+        ollamaModelEl.disabled = !ollamaEnabledEl.checked;
+        ollamaStatusEl.textContent = `Ollama connected · ${models.length} installed model${models.length === 1 ? '' : 's'}`;
+      }
+    } catch (error) {
+      ollamaStatusEl.textContent = error instanceof Error ? `Ollama unavailable · ${error.message}` : 'Ollama unavailable. Start the local server and allow the extension origin in OLLAMA_ORIGINS.';
+    } finally {
+      ollamaRefreshEl.removeAttribute('disabled');
+    }
+  });
+  ollamaModelEl.addEventListener('change', () => {
+    ollamaModelEl.dataset.selected = ollamaModelEl.value;
+    saveSettings({ ollamaModel: ollamaModelEl.value });
+    if (ollamaModelEl.value) ollamaStatusEl.textContent = `Ollama ready · ${ollamaModelEl.value}`;
+  });
   slopTestRun.addEventListener('click', async () => {
     const text = slopTestText.value.trim();
     if (!text) {
@@ -201,9 +250,10 @@ export function initModelTabs(): void {
     if (merged.signals?.length) out += `Signals: ${merged.signals.join(', ')}\n`;
     if (merged.onnx != null) out += `ONNX text: ${merged.onnx} (${merged.onnxLabel ?? '—'})\n`;
     if (merged.model != null) out += `Wllama: ${merged.model} (${merged.modelLabel ?? '—'})\n`;
+    if (merged.ollama != null) out += `Ollama: ${merged.ollama} (${merged.ollamaLabel ?? '—'}, ${merged.ollamaModel ?? 'model'})\n`;
     if (merged.image != null) out += `Image: ${merged.image}\n`;
-    if (!s.slopOnnxEnabled && !s.aiSlopModelEnabled) {
-      out += 'Enable ONNX and/or Wllama in settings for model scores.\n';
+    if (!s.slopOnnxEnabled && !s.aiSlopModelEnabled && !s.ollamaModelEnabled) {
+      out += 'Enable an optional model in settings to compare model-backed signals.\n';
     }
     slopTestResult.textContent = out;
   });

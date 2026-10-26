@@ -59,6 +59,8 @@ export async function getSettings(): Promise<ExtensionSettings> {
     spamBucketWeight: s.spamBucketWeight ?? DEFAULT_SETTINGS.spamBucketWeight,
     aiSlopModelEnabled: s.aiSlopModelEnabled ?? DEFAULT_SETTINGS.aiSlopModelEnabled,
     aiSlopModelAutoLoad: s.aiSlopModelAutoLoad ?? DEFAULT_SETTINGS.aiSlopModelAutoLoad,
+    ollamaModelEnabled: s.ollamaModelEnabled ?? DEFAULT_SETTINGS.ollamaModelEnabled,
+    ollamaModel: s.ollamaModel ?? DEFAULT_SETTINGS.ollamaModel,
     slopDisplayThreshold: s.slopDisplayThreshold ?? DEFAULT_SETTINGS.slopDisplayThreshold,
     slopPerTweetEnabled: s.slopPerTweetEnabled ?? DEFAULT_SETTINGS.slopPerTweetEnabled,
     slopOnnxEnabled: s.slopOnnxEnabled ?? DEFAULT_SETTINGS.slopOnnxEnabled,

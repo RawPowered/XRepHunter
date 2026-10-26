@@ -14,6 +14,7 @@ XRepHunter is designed to keep its settings and collected observations in the lo
 | `huggingface.co`, `cdn-lfs.huggingface.co` | Download model configuration and weights when a model is loaded. |
 | `cdn.jsdelivr.net` | Provide an ONNX WebAssembly fallback when the local runtime file is unavailable. |
 | `pbs.twimg.com`, `*.twimg.com` | Load public post images when the optional image classifier analyzes a media URL. |
+| `127.0.0.1:11434` | Optional host permission requested after the user chooses **Check local Ollama** in the dashboard. |
 
 The extension does not request access to every website for content scanning. Its web-accessible resources are exposed only as needed for extension loading and worker/model files; the `all_urls` match on a resource declaration does not add page host permission to scan every site.
 
@@ -21,10 +22,11 @@ The extension does not request access to every website for content scanning. Its
 
 - Settings, observed signals, browsing aggregates, and imported analytics stay in extension-local browser storage.
 - There is no application API, telemetry collector, or XRepHunter-owned server endpoint in this project.
-- Text classification executes locally after the model has been downloaded. Post text and the local database are not uploaded to XRepHunter infrastructure.
+- Bundled text classification executes in the extension after model weights have been downloaded. Post text and the local database are not uploaded to XRepHunter infrastructure.
+- Ollama scoring is off by default. When enabled, eligible post text (maximum 2,000 characters) is sent to the selected model through `http://127.0.0.1:11434/api/chat`. The model name is read from Ollama's `/api/tags` response. The extension does not send the profile database or images to Ollama. A separately configured remote Ollama provider may process requests outside the device; that provider's privacy terms then apply.
 - When image analysis is enabled, the browser fetches the referenced X media URL so the local image model can analyze it. The media request goes to the image host.
 - Model downloads go to the model host named in the source. Model files are cached by the browser. Model repositories and revisions are not all pinned to immutable commit hashes, so upstream changes can affect repeatability.
-- The source has no Ollama endpoint or Ollama server integration. Model inference described here runs in the extension through Transformers.js/ONNX Runtime Web or Wllama WebAssembly.
+- Ollama requests originate from the extension background service worker and use a fixed loopback host and port. The extension does not accept a user-supplied server URL, credentials, or arbitrary remote Ollama endpoint. Ollama's CORS/origin configuration may need the exact extension origin in `OLLAMA_ORIGINS`.
 - XRepHunter reads content available to the user’s signed-in browser session. The extension does not bypass access controls or use an X API key.
 
 X itself continues to make its normal website requests in the browser. XRepHunter’s page hook observes selected response data available to the page and passes parsed fields to the extension for local analysis.
@@ -32,6 +34,7 @@ X itself continues to make its normal website requests in the browser. XRepHunte
 ## Safeguards in the implementation
 
 - The project uses Manifest V3 and an extension-page Content Security Policy. `wasm-unsafe-eval` is enabled for WebAssembly inference; remote scripts are not configured as extension code.
+- The manifest declares only the optional Ollama origin `http://127.0.0.1:11434/*`; the browser grants it only after the user chooses **Check local Ollama**. Scoring remains disabled until the user opts in and selects a model.
 - Database and model work runs in an offscreen extension document and communicates with the background worker through extension messages.
 - Block suggestions are disabled by default. Enabling them requires an agreement, and the user confirms each account action in a separate dialog.
 - The scoring UI presents evidence and uncertainty. It does not claim that a score proves account identity or authorship.
@@ -46,6 +49,7 @@ Users can disable detectors and optional models, adjust thresholds, use learning
 - X’s page structure and internal GraphQL responses can change without notice. Parsing and page interaction may stop working until updated.
 - The content script operates on a page controlled by X. XRepHunter does not treat page-provided strings as trusted identity or verification data.
 - A downloaded model is third-party data. This project does not independently establish its quality, authorship labels, or license suitability for every use.
+- Ollama model output is an uncertain classifier signal, not proof of authorship. Prompt injection inside the analyzed post text is treated as untrusted input, but local model behavior can vary by model and version.
 - Npm dependency advisories remain under review. Major upgrades to Transformers.js and WXT require compatibility work and are outside this publication update.
 - No penetration test, privacy certification, or independent model audit is claimed.
 

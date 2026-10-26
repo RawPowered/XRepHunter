@@ -363,7 +363,7 @@ export function mergeSlopScores(
   };
 }
 
-/** Merge heuristic + ONNX + Wllama + image + media signals into one SlopAnalysis. */
+/** Merge heuristic + local model + Ollama + image + media signals into one SlopAnalysis. */
 export function mergeSlopAnalysisParts(parts: {
   heuristic: number;
   signals?: string[];
@@ -371,6 +371,9 @@ export function mergeSlopAnalysisParts(parts: {
   onnxLabel?: string;
   model?: number;
   modelLabel?: SlopAnalysis['modelLabel'];
+  ollama?: number;
+  ollamaLabel?: SlopAnalysis['ollamaLabel'];
+  ollamaModel?: string;
   image?: number;
   imageLabel?: string;
   mediaSignals?: string[];
@@ -380,6 +383,7 @@ export function mergeSlopAnalysisParts(parts: {
     parts.heuristic,
     parts.onnx ?? 0,
     parts.model ?? 0,
+    parts.ollama ?? 0,
     parts.image ?? 0,
   );
   return {
@@ -389,6 +393,9 @@ export function mergeSlopAnalysisParts(parts: {
     onnxLabel: parts.onnxLabel,
     model: parts.model,
     modelLabel: parts.modelLabel,
+    ollama: parts.ollama,
+    ollamaLabel: parts.ollamaLabel,
+    ollamaModel: parts.ollamaModel,
     image: parts.image,
     imageLabel: parts.imageLabel,
     mediaSignals: parts.mediaSignals,
@@ -405,6 +412,7 @@ export function formatSlopDetail(slop: SlopAnalysis): string {
   const parts = [`Slop score: ${slop.combined}`];
   if (slop.onnx != null) parts.push(`ONNX ${slop.onnx}`);
   if (slop.model != null) parts.push(`Wllama ${slop.model}`);
+  if (slop.ollama != null) parts.push(`Ollama ${slop.ollama} (${slop.ollamaModel ?? 'local model'})`);
   if (slop.image != null) parts.push(`image ${slop.image}`);
   return `${parts.join(' · ')}${sig}`;
 }

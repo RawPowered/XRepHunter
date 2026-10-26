@@ -16,7 +16,7 @@ npm install
 
 The postinstall script creates extension icons and copies SQLite, ONNX Runtime, and Wllama runtime assets from the versions recorded by `package-lock.json` into ignored build directories under `public/`.
 
-Ollama is not a dependency of this repository version. The source does not call an Ollama API or connect to a local Ollama server. `@huggingface/transformers` and ONNX Runtime Web are npm dependencies used for model-backed classifiers. `@wllama/wllama` supplies an in-browser WebAssembly runtime for a separate GGUF classifier. These runtimes are bundled into the extension during the build; they are not separate desktop applications to install.
+`@huggingface/transformers` and ONNX Runtime Web are npm dependencies used for model-backed classifiers. `@wllama/wllama` supplies an in-browser WebAssembly runtime for a separate GGUF classifier. These runtimes are bundled into the extension during the build. Ollama is optional and runs as a separate local service; it is used only when enabled in the dashboard and an installed model is selected.
 
 ## Build an unpacked extension
 
@@ -34,7 +34,16 @@ npm run dev
 
 ## Scoring and model downloads
 
-The core account reputation score runs in the extension using TypeScript heuristics, observed account and post signals, and user-maintained examples. It does not require Ollama or downloaded model weights. Model-backed text, image, and toxicity signals can refine content analysis when their models are loaded. Model settings and status are available in the dashboard.
+The core account reputation score runs in the extension using TypeScript heuristics, observed account and post signals, and user-maintained examples. It works without Ollama or downloaded model weights. Optional text, image, and toxicity classifiers refine content analysis. Ollama adds an additional text signal by sending eligible post text (up to 2,000 characters) to the local Ollama server at `127.0.0.1:11434`.
+
+### Enable Ollama scoring
+
+1. Install and start [Ollama](https://ollama.com/download) separately, then install at least one model using Ollama's own tools.
+2. Open the XRepHunter dashboard, choose **AI slop**, enable **Ollama scoring**, and choose **Check local Ollama**.
+3. Select one of the models returned by Ollama. XRepHunter only lists installed models; it does not pull or install models.
+4. If the extension cannot connect, allow the installed extension origin in Ollama's `OLLAMA_ORIGINS` setting, then restart Ollama. Prefer the exact `chrome-extension://<extension-id>` origin. Do not use a broad wildcard unless you understand its access implications.
+
+The extension calls only Ollama's `/api/tags` and `/api/chat` routes on loopback. The feature is disabled by default, and the loopback host permission is requested only when you press **Check local Ollama**. Text may still leave the machine if Ollama itself has been configured to use a remote provider. See [Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md) and [Ollama FAQ](https://github.com/ollama/ollama/blob/main/docs/faq.mdx) for server configuration details.
 
 Model weights are not included in the repository. The extension downloads them from the model URLs configured in source when a model is loaded. The browser may retain downloaded weights in its cache. A first load needs network access to the configured model host and enough local storage and memory for the selected model. Check the model provider, model card, and license before enabling a model for a use that depends on it.
 

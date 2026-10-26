@@ -39,6 +39,7 @@ import { scoreTextToxicityHeuristic } from '../../lib/detectors/toxicity-heurist
 import { onMessage } from '../../lib/messaging';
 import { normalizeReputationResult } from '../../lib/scoring/normalize-result';
 import { classifySlopMedia } from '../../lib/slop/classify';
+import { listOllamaModels } from '../../lib/ollama/api';
 import type { TweetMediaInfo } from '../../lib/slop/extract-tweet-content';
 import {
   checkSlopImageOffscreenStatus,
@@ -535,6 +536,8 @@ export function registerMessageRouter(): void {
         }
         return classifySlopText(msg.text);
       }
+      case 'OLLAMA_LIST_MODELS':
+        return listOllamaModels();
       case 'GET_SLOP_ONNX_MODEL_STATUS':
         return checkSlopOnnxOffscreenStatus();
       case 'INIT_SLOP_ONNX_MODEL':
